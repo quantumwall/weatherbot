@@ -20,7 +20,7 @@
     $current_humidity = $result['current']['humidity'];
     $current_wind_speed = $result['current']['wind_speed'];
     $current_wind_direction = $result['current']['wind_deg'];
-    $current_weather = ['decription' => $current_weather_desc,
+    $current_weather = ['description' => $current_weather_desc,
                         'temp' => $current_temp,
                         'temp_feels_like' => $current_temp_feels_like,
                         'pressure' => $current_pressure,
