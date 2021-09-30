@@ -13,23 +13,36 @@
     //print_r($result);
     //print "</pre>";
     $city = "Торбеево";
-    $current_weather_desc = $result['current']['weather'][0]['description'];
-    $current_temp = $result['current']['temp'];
-    $current_temp_feels_like = $result['current']['feels_like'];
-    $current_pressure = $result['current']['pressure'];
-    $current_humidity = $result['current']['humidity'];
-    $current_wind_speed = $result['current']['wind_speed'];
-    $current_wind_direction = $result['current']['wind_deg'];
-    $current_weather = ['description' => $current_weather_desc,
-                        'temp' => $current_temp,
-                        'temp_feels_like' => $current_temp_feels_like,
-                        'pressure' => $current_pressure,
-                        'current_humidity' => $current_humidity,
-                        'current_wind_speed' => $current_wind_speed,
-                        'current_wind_direction' => $current_wind_direction];
-    print serialize($current_weather);
-    /*print "<pre>";
+
+    //создать массив погоды на день
+    $daily = $result['daily'][0];
+    $daily_weather = ['city' => $city,
+                        'description' => $daily['weather'][0]['description'],
+                        'temp' => $daily['temp']['day'],
+                        'temp_feels_like' => $daily['feels_like']['day'],
+                        'pressure' => $daily['pressure'],
+                        'humidity' => $daily['humidity'],
+                        'wind_speed' => $daily['wind_speed'],
+                        'wind_direction' => $daily['wind_deg']];
+    unset($daily);
+
+    //создать массив погоды на текущий момент
+    $current = $result['current'];
+    $current_weather = ['city' => $city,
+                        'description' => $current['weather'][0]['description'],
+                        'temp' => $current['temp'],
+                        'temp_feels_like' => $current['feels_like'],
+                        'pressure' => $current['pressure'],
+                        'humidity' => $current['humidity'],
+                        'wind_speed' => $current['wind_speed'],
+                        'wind_direction' => $current['wind_deg']];
+    unset($current);
+
+
+    print "<pre>";
     print_r($current_weather);
-    print "</pre>";*/
-    //print "$city $current_weather_desc $current_temp $current_temp_feels_like $current_pressure $current_humidity $current_wind_speed $current_wind_direction";
-    //то же самое, но для всего дня
+    print "</pre>";
+
+    print "<pre>";
+    print_r($daily_weather);
+    print "</pre>";

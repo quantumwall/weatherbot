@@ -1,7 +1,7 @@
 <?php
     require_once 'query.php';
-    require_once 'weather.php';
-    
+    require_once 'init_config.php';
+
     function getWindDirection ($direction) {
         //возвращает словесное описание направления ветра
         if (($direction >= 0 and $direction <= 10) or
@@ -26,21 +26,24 @@
             }
         return $wind_direction;
     }
-    
+
     function hPaTOmmHg ($hPa) {
-        //конвертирует значение давление в гектопаскалях 
+        //конвертирует значение давление в гектопаскалях
         //в миллиметры ртутного столба и возвращает значение
         return $hPa * 0.75;
     }
-    
+    //получить сообщение от пользователя
+    //взять chat_id, имя пользователя и его сообщение
     $update = json_decode(file_get_contents('php://input'), true);
     $chat_id = $update['message']['chat']['id'];
     $username = $update['message']['from']['first_name'];
     $msg = $update['message']['text'];
     $dt = date('d-m-Y H:i:s', time()+10800);
     $message = "Неизвестная команда.\nДля вывода списка доступных команд набери /help\n";
-    $client = new TelegramQuery(BOT_URL, BOT_TOKEN);
-    
+
+
+    $bot = new TelegramQuery(BOT_URL, BOT_TOKEN);
+
     switch (strtolower(ltrim($msg, "/"))) {
         case "start":
             $message = "Привет $username!\nЭто бот, предоставляющий сведения о текущей погоде или погоде на сегодняшний день.
@@ -49,25 +52,32 @@
         case "help":
             $message = "/start - Приветственное сообщение
 /current - Погода на данный момент
-/daily - Погода на сегодняшний день
+/today - Погода на сегодняшний день
 /help - Спискок команд(эта справка)\n";
             break;
         case "current":
-            list('description' => $desc,'temp' => $temp,'temp_feels_like' => $temp_feels_like,
-            'pressure' => $pressure, 'current_humidity' => $current_humidity,
-            'current_wind_speed' => $current_wind_speed, 'current_wind_direction' => $current_wind_direction) = $current_weather;
-            
-            $current_wind_direction = getWindDirection($current_wind_direction);
-            $message = "Сейчас в Торбеево $desc 
-$temp градусов 
-ощущается как $temp_feels_like градусов 
-ветер $current_wind_direction $current_wind_speed м/с 
-давление " . hPaTOmmHg($pressure) . " мм.рт.ст. 
-влажность $current_humidity %\n";
+            require_once 'weather.php';
+            list('city' => $city, 'description' => $desc,'temp' => $temp,'temp_feels_like' => $temp_feels_like,
+            'pressure' => $pressure, 'humidity' => $humidity,
+            'wind_speed' => $wind_speed, 'wind_direction' => $wind_direction) = $current_weather;
+            $wind_direction = getWindDirection($wind_direction);
+            $message = "Сейчас в $city $desc, ".round($temp, 1)." градусов
+ощущается как ".round($temp_feels_like, 1)." градусов
+ветер $wind_direction $wind_speed м/с
+давление " . round(hPaTOmmHg($pressure), 1) . " мм.рт.ст.
+влажность $humidity %\n";
+            break;
+        case "today":
+            require_once 'weather.php';
+            list('city' => $city, 'description' => $desc,'temp' => $temp, 'temp_feels_like' => $temp_feels_like,
+            'pressure' => $pressure, 'humidity' => $humidity,
+            'wind_speed' => $wind_speed, 'wind_direction' => $wind_direction) = $daily_weather;
+            $wind_direction = getWindDirection($wind_direction);
+            $message = "Сегодня в $city $desc, ".round($temp, 1)." градусов
+ощущается как ".round($temp_feels_like, 1)." градусов
+ветер $wind_direction $wind_speed м/с
+давление " . round(hPaTOmmHg($pressure), 1) . " мм.рт.ст.
+влажность $humidity %\n";
     }
-    
-    $client->sendMessage($chat_id, $message);
-    
-    file_put_contents("log.txt", "[$dt] chat_id => $chat_id\n", FILE_APPEND);
-    file_put_contents("log.txt", "[$dt] username => $username\n", FILE_APPEND);
-    file_put_contents("log.txt", "[$dt] message => $msg\n", FILE_APPEND);
+
+    $bot->sendMessage($chat_id, $message);

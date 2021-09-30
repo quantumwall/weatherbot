@@ -1,7 +1,5 @@
 <?php
    
-    //require_once "init_config.php";
-
     class DBQuery {
         public function __construct($db_name, $db_user, $db_pass) {
             $db = new PDO ($db_name, $db_user, $db_pass);
